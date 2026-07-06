@@ -15,7 +15,10 @@ class_name RubiconInterpolatedCamera2D extends Camera2D
 
 @export_group("Rotation (Degrees)", "rotation_interpolate_")
 ## Determines whether the camera should or should not interpolate its [member rotation] to [member rotation_interpolate_target].
-@export_custom(PROPERTY_HINT_GROUP_ENABLE, "") var rotation_interpolate_enabled: bool = true
+@export_custom(PROPERTY_HINT_GROUP_ENABLE, "") var rotation_interpolate_enabled: bool = true:
+	set(v):
+		rotation_interpolate_enabled = v
+		update_configuration_warnings()
 ## The camera's target rotation, in radians (as degrees visually).
 @export_custom(PROPERTY_HINT_RANGE, "-360,360,0.1,radians_as_degrees") var rotation_interpolate_target: float = 0.0 
 ## The camera's offset rotation that gets added to [member rotation_interpolate_target]. [member rotation_interpolate_smooth_offset] will determine if the offset should be smooth or immediate.
@@ -39,11 +42,17 @@ class_name RubiconInterpolatedCamera2D extends Camera2D
 
 func _notification(what: int) -> void:
 	match what:
-		NOTIFICATION_READY:
-			position_interpolate_target = global_position
-			rotation_interpolate_target = global_rotation
-			zoom_interpolate_target = zoom
-			set_process_internal(true)
+		#NOTIFICATION_READY:
+			#set_process_internal(true)
+			
+		NOTIFICATION_EDITOR_PRE_SAVE:
+			if position_interpolate_enabled:
+				global_position = position_interpolate_target + position_interpolate_offset
+			if rotation_interpolate_enabled:
+				global_rotation = rotation_interpolate_target + rotation_interpolate_offset
+			if zoom_interpolate_enabled:
+				zoom = zoom_interpolate_target + zoom_interpolate_offset
+			
 		#NOTIFICATION_INTERNAL_PROCESS:
 			#var delta : float = get_process_delta_time()
 			#if position_interpolate_enabled:
@@ -65,9 +74,14 @@ func _process(delta: float) -> void:
 	if zoom_interpolate_enabled:
 		zoom = zoom.lerp(zoom_interpolate_target + zoom_interpolate_offset, zoom_interpolate_speed * delta)
 
+func _get_configuration_warnings() -> PackedStringArray:
+	var warnings:PackedStringArray = []
+	if ignore_rotation and rotation_interpolate_enabled:
+		warnings.append(tr(&"ignore_rotation is enabled, rotation cannot be interpolated."))
+	
+	return warnings
 
-#func _set(property: StringName, value: Variant) -> bool:
-	#if property == &"enabled" and value is bool and value:
-		#print("reenabled cam")
-		#set_process_internal(true)
-	#return false
+func _set(property: StringName, value: Variant) -> bool:
+	if property == &"ignore_rotation":
+		update_configuration_warnings()
+	return false
