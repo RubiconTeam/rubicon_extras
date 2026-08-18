@@ -27,8 +27,6 @@ enum BumpTime {
 @export_custom(PROPERTY_HINT_LINK, "") var bump_amount: Vector2 = Vector2(0.05, 0.05)
 @export var bump_interpolate_speed: float = 3.125
 
-
-
 var _icon_property_list: PackedStringArray = []
 @export_storage var _icon_property_value: Dictionary[StringName, Vector2]
 
@@ -70,14 +68,13 @@ func set_bump_time(new_bump_time: BumpTime):
 func icon_bump() -> void:
 	if !enabled:
 		return
-	print("uh")
+	
 	var cur_time: int = floorf(get_cur_time_value())
 	if cur_time % bump_interval != 0:
 		return
 	
 	for icon in icons_to_bump:
 		icon.scale += bump_amount
-		print(icon.scale)
 
 var placeholder_icon_base_scale: Vector2 = Vector2.ONE
 func _process(delta: float) -> void:
@@ -130,7 +127,7 @@ func _get_property_list() -> Array[Dictionary]:
 func _get(property: StringName) -> Variant:
 	if property.begins_with("scale_"):
 		if _icon_property_list.has(property):
-			print("get property "+property)
+			#print("get property "+property)
 			return _icon_property_value[property]
 	
 	return null
@@ -139,6 +136,6 @@ func _set(property: StringName, value: Variant) -> bool:
 	if property.begins_with("scale_"):
 		if _icon_property_list.has(property):
 			_icon_property_value.set(property, value)
-			print("set property "+property)
+			#print("set property "+property)
 			return true
 	return false
