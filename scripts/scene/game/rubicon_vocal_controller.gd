@@ -30,6 +30,6 @@ func _on_note_changed(result: RubiconLevelNoteHitResult, _has_ending_row: bool) 
 func _play_miss() -> void:
 	if _misses.is_empty(): return
 
-	var miss := _misses[randi_range(0, maxi(_misses.size() - 1, 0))]
+	var miss := _misses[randi_range(0, _misses.size() - 1)]
 	miss.pitch_scale = randf_range(pitch_range_min, pitch_range_max)
 	miss.play()
