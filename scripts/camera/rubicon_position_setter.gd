@@ -33,19 +33,44 @@ class_name RubiconPositionSetter extends Node
 		var target : Node = point_map[_current_point]
 		if is_attached_to_2d_camera():
 			if position_enabled:
-				_camera_2d.position_interpolate_target = _get_2d_global_position(target)
+				if use_target_values and _camera_2d is RubiconInterpolatedCamera2D:
+					_camera_2d.position_interpolate_target = _get_2d_global_position(target)
+				else:
+					_camera_2d.global_position = _get_2d_global_position(target)
 			
 			if rotation_enabled:
-				_camera_2d.rotation_interpolate_target = target.global_rotation
+				if use_target_values and _camera_2d is RubiconInterpolatedCamera2D:
+					_camera_2d.rotation_interpolate_target = target.global_rotation
+				else:
+					_camera_2d.global_rotation = target.global_rotation
 		elif is_attached_to_3d_camera():
 			if position_enabled:
-				_camera_3d.position_interpolate_target = target.global_position
+				if use_target_values and _camera_3d is RubiconInterpolatedCamera3D:
+					_camera_3d.position_interpolate_target = target.global_position
+				else:
+					_camera_3d.global_position = target.global_position
 			
 			if rotation_enabled:
-				_camera_3d.basis_interpolate_target = target.global_basis
+				if use_target_values:
+					_camera_3d.basis_interpolate_target = target.global_basis
+				else:
+					_camera_3d.global_basis = target.global_basis
+
+## Use the [member position_interpolate_target] and [member rotation_interpolate_target] from [RubiconInterpolatedCamera2D] or [RubiconInterpolatedCamera3D].[br][br]
+## This variable will only show up in case the parent camera is one of the two.
+@export_storage var use_target_values: bool = true
 
 func _get_property_list() -> Array[Dictionary]:
 	var properties : Array[Dictionary] = []
+	
+	var is_interpolated_camera: bool = (is_attached_to_2d_camera() and _camera_2d is RubiconInterpolatedCamera2D) or (is_attached_to_3d_camera() and _camera_3d is RubiconInterpolatedCamera3D)
+	
+	if is_interpolated_camera:
+			properties.append({
+			name = &"use_target_values",
+			type = TYPE_BOOL,
+			usage = PROPERTY_USAGE_DEFAULT
+		})
 	
 	var points : PackedStringArray = []
 	for point:StringName in point_map.keys():
@@ -68,8 +93,8 @@ func _get_property_list() -> Array[Dictionary]:
 	
 	return properties
 
-var _camera_2d : RubiconInterpolatedCamera2D
-var _camera_3d : RubiconInterpolatedCamera3D
+var _camera_2d : Camera2D
+var _camera_3d : Camera3D
 
 func is_attached_to_2d_camera() -> bool:
 	return _camera_2d != null
@@ -81,9 +106,9 @@ func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_PARENTED:
 			var parent : Node = get_parent()
-			if parent is RubiconInterpolatedCamera2D:
+			if parent is Camera2D:
 				_camera_2d = parent
-			elif parent is RubiconInterpolatedCamera3D:
+			elif parent is Camera3D:
 				_camera_3d = parent
 		NOTIFICATION_UNPARENTED:
 			_camera_2d = null
