@@ -92,6 +92,7 @@ func set_bump_time(new_bump_time: BumpTime):
 				_level.clock.measure_change.connect(camera_bump)
 
 func camera_bump() -> void:
+	if not enabled: return
 	var cur_time: int = floorf(get_cur_time_value())
 	if cur_time % bump_interval != 0:
 		return
