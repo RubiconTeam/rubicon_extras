@@ -91,9 +91,8 @@ func set_bump_time(new_bump_time: BumpTime):
 			if !_level.clock.measure_change.is_connected(camera_bump):
 				_level.clock.measure_change.connect(camera_bump)
 
-func camera_bump() -> void:
-	if not enabled: return
-	var cur_time: int = floorf(get_cur_time_value())
+func camera_bump(time_value: float) -> void:
+	var cur_time: int = floorf(time_value)
 	if cur_time % bump_interval != 0:
 		return
 	
@@ -101,11 +100,3 @@ func camera_bump() -> void:
 		_camera_2d.zoom += Vector2(bump_amount, bump_amount)
 	if _camera_3d != null:
 		_camera_3d.fov += bump_amount
-
-func get_cur_time_value() -> float:
-	match bump_every:
-		BumpTime.BEAT:
-			return _level.clock.time_beat
-		BumpTime.STEP:
-			return _level.clock.time_step
-	return _level.clock.time_measure
