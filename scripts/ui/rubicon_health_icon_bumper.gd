@@ -89,11 +89,11 @@ func set_bump_time(new_bump_time: BumpTime):
 			if !rubicon_level.clock.measure_change.is_connected(icon_bump):
 				rubicon_level.clock.measure_change.connect(icon_bump)
 
-func icon_bump() -> void:
+func icon_bump(time_value: float) -> void:
 	if !enabled:
 		return
 	
-	var cur_time: int = floorf(get_cur_time_value())
+	var cur_time: int = floorf(time_value)
 	if cur_time % bump_interval != 0:
 		return
 	
@@ -118,14 +118,6 @@ func _process(delta: float) -> void:
 		icon_group_first.scale = icon_group_first.scale.lerp(placeholder_icon_base_scale_first, bump_interpolate_speed * delta)
 	if icon_group_second != null:
 		icon_group_second.scale = icon_group_second.scale.lerp(placeholder_icon_base_scale_second, bump_interpolate_speed * delta)
-
-func get_cur_time_value() -> float:
-	match bump_every:
-		BumpTime.BEAT:
-			return rubicon_level.clock.time_beat
-		BumpTime.STEP:
-			return rubicon_level.clock.time_step
-	return rubicon_level.clock.time_measure
 
 #func _get_property_list() -> Array[Dictionary]:
 	#var properties: Array[Dictionary] = []
